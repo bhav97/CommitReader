@@ -1,5 +1,6 @@
 package purplevomit.commit;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -10,6 +11,7 @@ import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -159,6 +161,13 @@ public class FeedActivity extends AppCompatActivity {
             }
         };
 
+        feed.addOnScrollListener(new InfiniteScrollListener(gridLayoutManager, loader) {
+            @Override
+            public void onLoadMore() {
+                loader.getComicList();
+            }
+        });
+
         checkConnectivity();
         if(connected) loader.getComicList();
     }
@@ -206,16 +215,23 @@ public class FeedActivity extends AppCompatActivity {
             if (comicAdapter.getDataItemCount() != 0) return;
             runOnUiThread(() -> {
                 noConnection.setVisibility(View.GONE);
+//                fadeOut(noConnection);
                 progress.setVisibility(View.VISIBLE);
                 loader.getComicList();
+                getWindow().setStatusBarColor(ContextCompat.getColor(FeedActivity.this,
+                        R.color.colorPrimaryDark));
             });
         }
 
         @Override
         public void onLost(Network network) {
             if(comicAdapter.getDataItemCount() == 0) {
-                noConnection.setVisibility(View.VISIBLE);
-                progress.setVisibility(View.GONE);
+                runOnUiThread(() -> {
+                    checkConnectivity();
+                });
+            } else {
+                getWindow().setStatusBarColor(ContextCompat.getColor(FeedActivity.this,
+                        android.R.color.holo_red_light));
             }
             connected = false;
         }
@@ -226,15 +242,42 @@ public class FeedActivity extends AppCompatActivity {
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         connected = activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        //todo: more connectivity checks
         if (!connected) {
-            //todo:doshithere
-
+            sheetBehavior.setState(STATE_HIDDEN);
+            noConnection.setVisibility(View.VISIBLE);
+            getWindow().setStatusBarColor(ContextCompat.getColor(FeedActivity.this,
+                    android.R.color.holo_red_light));
             connectivityManager.registerNetworkCallback(
                     new NetworkRequest.Builder()
                             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(),
                     connectivityCallback);
             networkMonitored = true;
         }
+    }
+
+    private void fadeOut(View v) {
+        v.animate().setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                v.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        }).setDuration(200L).alpha(0).start();
     }
 
 }

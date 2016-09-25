@@ -50,6 +50,10 @@
             android:textStyle="bold" />
     </FrameLayout>
 
+    <!--<FrameLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"></FrameLayout>-->
+
     <LinearLayout
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"

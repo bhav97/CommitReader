@@ -19,6 +19,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'me.tatarka.retrolambda'
 
+def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+def gitTag = 'git describe --tags'.execute([], project.rootDir).text.trim()
+def gitCommitCount = 100 +
+        Integer.parseInt('git rev-list --count HEAD'.execute([], project.rootDir).text.trim())
+
+
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.1"
@@ -27,8 +33,8 @@ android {
         applicationId "purplevomit.commit"
         minSdkVersion 21
         targetSdkVersion 24
-        versionCode 1
-        versionName "1.0"
+        versionCode gitCommitCount
+        versionName gitTag + " b" + gitSha
     }
     buildTypes {
         release {

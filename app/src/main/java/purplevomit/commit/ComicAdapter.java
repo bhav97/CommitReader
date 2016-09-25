@@ -22,7 +22,7 @@ import butterknife.ButterKnife;
 /**
  * Created by bhav on 9/23/16 for the CommitReader Project.
  */
-public abstract class ComicAdapter extends Adapter<ComicAdapter.ComicHolder> implements ISelectListener{
+public abstract class ComicAdapter extends Adapter<ComicAdapter.ComicHolder> {
 
     private List<Comic> comicList;
     private Activity host;
@@ -106,4 +106,6 @@ public abstract class ComicAdapter extends Adapter<ComicAdapter.ComicHolder> imp
             data.setOnClickListener((view) -> data.setVisibility(View.GONE));
         }
     }
+
+    public abstract void onSelect(Comic comic);
 }
