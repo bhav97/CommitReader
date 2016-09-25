@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/base"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
+    android:animateLayoutChanges="true">
+
+    <purplevomit.commit.ForegroundImageView
+        android:id="@+id/thumb"
+        android:layout_width="match_parent"
+        android:background="@color/thumb_placeholder"
+        android:layout_height="0dp" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:autoLink="none"
+        android:background="@color/meta_bar_bg"
+        android:elevation="4dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:includeFontPadding="true"
+        android:maxEms="20"
+        android:maxLines="1"
+        android:padding="4dp"
+        android:paddingEnd="12dp"
+        android:paddingStart="96dp"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:typeface="monospace" />
+
+    <TextView
+        android:id="@+id/data"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@color/meta_bar_bg"
+        android:elevation="6dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:typeface="monospace"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="84dp"
+        android:layout_height="84dp"
+        android:layout_gravity="start|bottom"
+        android:elevation="4dp" />
+
+</FrameLayout>
