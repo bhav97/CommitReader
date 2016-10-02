@@ -14,7 +14,7 @@ import retrofit2.Response;
 /**
  * Created by bhav on 9/23/16 for the CommitReader Project.
  */
-public abstract class Loader extends LoaderBase<List<Comic>, Comic, String> {
+public abstract class Loader extends LoaderBase<List<Comic>, Comic> {
 
     private final static String TAG = Loader.class.getSimpleName();
 

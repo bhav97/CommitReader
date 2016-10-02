@@ -71,7 +71,7 @@ public class FeedActivity extends AppCompatActivity {
     private ComicAdapter comicAdapter;
     private BottomSheetBehavior sheetBehavior;
 
-    private List<Comic> comics;
+    private ArrayList<Comic> comics;
     private Loader loader;
 
     private boolean comicLoaded = false;
@@ -99,6 +99,12 @@ public class FeedActivity extends AppCompatActivity {
             //animate something
         }
     };
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(Comic.BUNDLE_EXTRA, comics);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,7 +167,8 @@ public class FeedActivity extends AppCompatActivity {
 
             @Override
             public void onComicListLoaded(List<Comic> data) {
-                comicAdapter.insert(data);
+                comics.addAll(data);
+                comicAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -195,15 +202,15 @@ public class FeedActivity extends AppCompatActivity {
             }
         };
 
-        feed.addOnScrollListener(new InfiniteScrollListener(gridLayoutManager, loader) {
-            @Override
-            public void onLoadMore() {
-                loader.getComicList();
-            }
-        });
-
         checkConnectivity();
-        if(connected) loader.getComicList();
+        //note: vaadaa paav
+        if (savedInstanceState != null && savedInstanceState.containsKey(Comic.BUNDLE_EXTRA) && !comics.isEmpty()) {
+            comics.addAll(savedInstanceState.getParcelableArrayList(Comic.BUNDLE_EXTRA));
+            comicAdapter.notifyDataSetChanged();
+            finishLoad();
+        } else {
+            if (connected) loader.getComicList();
+        }
     }
 
     @Override

@@ -15,7 +15,7 @@
         android:id="@+id/dlprogress"
         style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:progressDrawable="@color/meta_bar_bg"
+        android:progressDrawable="@color/cs_black"
         android:layout_height="wrap_content"
         android:indeterminate="true" />
 
@@ -32,7 +32,7 @@
         android:minHeight="@dimen/bottom_sheet_height"
         android:padding="16dp"
         android:textAlignment="center"
-        android:textColor="@color/meta_bar_bg"
+        android:textColor="@color/cs_black"
         android:textSize="16sp"
         android:textStyle="bold" />
 

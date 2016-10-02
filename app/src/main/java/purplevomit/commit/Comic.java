@@ -7,7 +7,8 @@ import android.os.Parcelable;
  * Created by bhav on 9/23/16 for the CommitReader Project.
  */
 public class Comic implements Parcelable {
-    public final static String INTENT_EXTRA = Comic.class.getSimpleName() + ".parcel";
+    public final static String INTENT_EXTRA = Comic.class.getSimpleName() + ".intent";
+    public final static String BUNDLE_EXTRA = Comic.class.getSimpleName() + ".bundle";
     public long id;
     public long height;
     public long width;
