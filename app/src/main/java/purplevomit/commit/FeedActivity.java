@@ -1,6 +1,5 @@
 package purplevomit.commit;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -16,12 +15,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +41,7 @@ import static android.support.design.widget.BottomSheetBehavior.STATE_COLLAPSED;
 import static android.support.design.widget.BottomSheetBehavior.STATE_EXPANDED;
 import static android.support.design.widget.BottomSheetBehavior.STATE_HIDDEN;
 import static android.support.design.widget.BottomSheetBehavior.from;
+import static android.view.View.*;
 
 public class FeedActivity extends AppCompatActivity {
     private final static String TAG = FeedActivity.class.getSimpleName();
@@ -48,13 +53,15 @@ public class FeedActivity extends AppCompatActivity {
     @BindView(R.id.title)
     TextView title;
     @BindView(android.R.id.empty)
-    ProgressBar progress;
+    LoadingGrid progress;
     @BindView(R.id.comic)
     PhotoView comicHolder;
     @BindView(R.id.dlprogress)
     ProgressBar dlprogress;
     @BindView(R.id.no_connection)
     FrameLayout noConnection;
+    @BindView(R.id.empty_bg)
+    FrameLayout emptyBg;
     @BindInt(R.integer.columns)
     int columns;
     @BindDimen(R.dimen.bottom_sheet_height)
@@ -72,6 +79,7 @@ public class FeedActivity extends AppCompatActivity {
 
     private boolean connected = true;
     private boolean networkMonitored = false;
+    private int previousSheetState = 9;
 
     private BottomSheetCallback sheetCallback = new BottomSheetCallback() {
         @Override
@@ -81,7 +89,9 @@ public class FeedActivity extends AppCompatActivity {
             } else if (newState == STATE_HIDDEN) {
                 comicLoaded = false;
                 changeRecyclerViewBottomPadding(feed.getPaddingTop());
+//            } else if (newState == STATE_EXPANDED) {
             }
+            previousSheetState = newState;
         }
 
         @Override
@@ -130,25 +140,27 @@ public class FeedActivity extends AppCompatActivity {
             }
         });
 
-        loader = new Loader(this) {
+        loader = new Loader(getSharedPreferences("prefs", Context.MODE_PRIVATE)
+                .getString("language", "en")) {
             @Override
             protected void loadStarted(String s) {
-                dlprogress.setVisibility(View.VISIBLE);
+                dlprogress.setVisibility(VISIBLE);
             }
 
             @Override
             protected void loadFinished(String s) {
-                dlprogress.setVisibility(View.GONE);
+                if(progress.getVisibility() == VISIBLE) {
+                    finishLoad();
+                }
             }
 
             @Override
             protected void loadFailed(String s) {
-                dlprogress.setVisibility(View.GONE);
+                dlprogress.setProgress(0);
             }
 
             @Override
             public void onComicListLoaded(List<Comic> data) {
-                progress.setVisibility(View.GONE);
                 comicAdapter.insert(data);
             }
 
@@ -156,6 +168,28 @@ public class FeedActivity extends AppCompatActivity {
             public void onComicLoaded(Comic data) {
                 Glide.with(FeedActivity.this)
                         .load(data.image)
+                        .listener(new RequestListener<String, GlideDrawable>() {
+                            @Override
+                            public boolean onException(Exception e,
+                                                       String model,
+                                                       Target<GlideDrawable> target,
+                                                       boolean isFirstResource) {
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(GlideDrawable resource,
+                                                           String model,
+                                                           Target<GlideDrawable> target,
+                                                           boolean isFromMemoryCache,
+                                                           boolean isFirstResource) {
+                                dlprogress.setVisibility(INVISIBLE);
+                                if(!gridLayoutManager.isSmoothScrolling()) {
+                                    sheetBehavior.setState(STATE_EXPANDED);
+                                }
+                                return false;
+                            }
+                        })
                         .into(comicHolder);
                 loadedComic = data;
             }
@@ -214,9 +248,9 @@ public class FeedActivity extends AppCompatActivity {
             connected = true;
             if (comicAdapter.getDataItemCount() != 0) return;
             runOnUiThread(() -> {
-                noConnection.setVisibility(View.GONE);
+                noConnection.setVisibility(GONE);
 //                fadeOut(noConnection);
-                progress.setVisibility(View.VISIBLE);
+                progress.setVisibility(VISIBLE);
                 loader.getComicList();
                 getWindow().setStatusBarColor(ContextCompat.getColor(FeedActivity.this,
                         R.color.colorPrimaryDark));
@@ -245,7 +279,7 @@ public class FeedActivity extends AppCompatActivity {
         //todo: more connectivity checks
         if (!connected) {
             sheetBehavior.setState(STATE_HIDDEN);
-            noConnection.setVisibility(View.VISIBLE);
+            noConnection.setVisibility(VISIBLE);
             getWindow().setStatusBarColor(ContextCompat.getColor(FeedActivity.this,
                     android.R.color.holo_red_light));
             connectivityManager.registerNetworkCallback(
@@ -256,28 +290,20 @@ public class FeedActivity extends AppCompatActivity {
         }
     }
 
-    private void fadeOut(View v) {
-        v.animate().setListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                v.setVisibility(View.GONE);
-            }
+    private void finishLoad() {
+        Animation fadeOut = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+        progress.setAnimation(fadeOut);
+        emptyBg.setAnimation(fadeOut);
+        fadeOut.start();
+        fadeOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override public void onAnimationStart(Animation animation) {} //no-op
+            @Override public void onAnimationRepeat(Animation animation) {} //no-op
 
             @Override
-            public void onAnimationCancel(Animator animator) {
-
+            public void onAnimationEnd(Animation animation) {
+                emptyBg.setVisibility(GONE);
+                progress.setVisibility(GONE);
             }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-
-            }
-        }).setDuration(200L).alpha(0).start();
+        });
     }
-
 }

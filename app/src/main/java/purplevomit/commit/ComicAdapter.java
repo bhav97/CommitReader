@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -40,15 +41,25 @@ public abstract class ComicAdapter extends Adapter<ComicAdapter.ComicHolder> {
         holder.base.setOnClickListener((view) -> onSelect(comicList.get(holder.getAdapterPosition())));
         holder.base.setOnTouchListener((view, event) -> {
             final int action = event.getAction();
+            long touchStart = 0;
             if (!(action == MotionEvent.ACTION_DOWN
                     || action == MotionEvent.ACTION_UP
-                    || action == MotionEvent.ACTION_CANCEL)) return false;
+                    || action == MotionEvent.ACTION_CANCEL
+                    || action == MotionEvent.ACTION_MOVE)) return false;
             switch (action) {
+                // needs a better algorithm to differentiate between touche and drage
+                case MotionEvent.ACTION_MOVE:
+                    holder.data.setVisibility(View.GONE);
+                    break;
                 case MotionEvent.ACTION_DOWN:
+                    touchStart = Calendar.getInstance().getTimeInMillis();
                     holder.data.setVisibility(View.VISIBLE);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
+                    if(Calendar.getInstance().getTimeInMillis() - touchStart < 200) {
+                        onSelect(comicList.get(holder.getAdapterPosition()));
+                    } // hmmm..?
                     holder.data.setVisibility(View.GONE);
                     break;
             }
@@ -59,7 +70,6 @@ public abstract class ComicAdapter extends Adapter<ComicAdapter.ComicHolder> {
 
     @Override
     public void onBindViewHolder(ComicHolder holder, int position) {
-        final Comic c = comicList.get(holder.getAdapterPosition());
         Glide.with(host)
                 .load(comicList.get(holder.getAdapterPosition()).thumbnail)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -107,5 +117,5 @@ public abstract class ComicAdapter extends Adapter<ComicAdapter.ComicHolder> {
         }
     }
 
-    public abstract void onSelect(Comic comic);
+    protected abstract void onSelect(Comic comic);
 }

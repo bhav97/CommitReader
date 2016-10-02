@@ -1,6 +1,5 @@
 package purplevomit.commit;
 
-import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
@@ -26,10 +25,9 @@ public abstract class Loader extends LoaderBase<List<Comic>, Comic, String> {
     private String language;
     private int page;
 
-    public Loader(Context context) {
+    public Loader(String language) {
         callMap = new HashMap<>();
-        language = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
-                .getString("language", "en");
+        this.language = language;
         page = 1;
     }
 

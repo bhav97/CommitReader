@@ -12,14 +12,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingEnd="4dp"
-        android:paddingStart="4dp" />
+        android:paddingEnd="2dp"
+        android:paddingStart="2dp" />
 
-    <ProgressBar
-        android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+    <FrameLayout
+        android:id="@+id/empty_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark">
+
+        <purplevomit.commit.LoadingGrid
+            android:id="@android:id/empty"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/loading"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:layout_gravity="bottom"
+            android:padding="32dp"/>
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/no_connection"
@@ -50,48 +68,7 @@
             android:textStyle="bold" />
     </FrameLayout>
 
-    <!--<FrameLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"></FrameLayout>-->
-
-    <LinearLayout
-        android:id="@+id/bottom_sheet"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/background_light"
-        android:clickable="true"
-        android:orientation="vertical"
-        app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
-
-        <ProgressBar
-            android:id="@+id/dlprogress"
-            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-8dp"
-            android:indeterminate="true" /> <!-- Bad code :( -->
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-smallcaps"
-            android:gravity="center"
-            android:maxLines="2"
-            android:minHeight="@dimen/bottom_sheet_height"
-            android:padding="16dp"
-            android:textAlignment="center"
-            android:textColor="@color/meta_bar_bg"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <uk.co.senab.photoview.PhotoView
-            android:id="@+id/comic"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </LinearLayout>
-
+    <include layout="@layout/sheet_comic"/>
 
 
 </android.support.design.widget.CoordinatorLayout>

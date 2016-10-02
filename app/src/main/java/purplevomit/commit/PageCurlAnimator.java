@@ -1,4 +1,7 @@
 //package purplevomit.commit;
+//
+//import android.animation.Animator;
+//
 //todo: add page flip
 //import android.animation.Animator;
 //import android.graphics.Bitmap;
