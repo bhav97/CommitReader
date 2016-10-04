@@ -1,4 +1,4 @@
-package purplevomit.commit;
+package purplevomit.commit.ui;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -21,9 +21,11 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import purplevomit.commit.data.api.Comic;
+import purplevomit.commit.R;
 
 /**
- * Created by bhav on 9/23/16 for the CommitReader Project.
+ * Adapter class for managing recyclerViews.
  */
 public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder> {
 
@@ -32,8 +34,6 @@ public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder> {
     private final static int VIEW_TYPE_IMAGE = 0;
     private final static int VIEW_TYPE_COLOR = 1;
 
-    private final static float CLICK_HIGH_THRESHOLD = 200;
-    private final static float CLICK_LOW_THRESHOLD = 50;
     private final static long HOLD_MIN_DURATION = 200;
 
     private List<Comic> comicList;
@@ -49,7 +49,7 @@ public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder> {
         }
     };
 
-    public ComicAdapter(Activity host, List<Comic> items) {
+    ComicAdapter(Activity host, List<Comic> items) {
         this.comicList = items;
         this.host = host;
     }
@@ -145,17 +145,15 @@ public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder> {
         return comicList.size();
     }
 
-    public void insert(List<Comic> data) {
-        this.comicList.addAll(data);
-        notifyDataSetChanged();
-    }
-
-    public int getDataItemCount() {
+    int getDataItemCount() {
         return comicList.size();
     }
 
     protected abstract void onSelect(Comic comic);
 
+    /**
+     * Holder for Comics with thumbnail
+     */
     public static class ComicThumbHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.thumb)
@@ -169,19 +167,22 @@ public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder> {
         @BindView(R.id.data)
         TextView data;
 
-        public ComicThumbHolder(View itemView) {
+        ComicThumbHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             data.setOnClickListener((view) -> data.setVisibility(View.GONE));
         }
     }
 
+    /**
+     * Holder for comics without thumbnail
+     */
     public class ComicColorHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.bg)
         TextView bg;
 
-        public ComicColorHolder(View itemView) {
+        ComicColorHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

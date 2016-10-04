@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/comic_placeholder"
-    tools:context="purplevomit.commit.FeedActivity">
+    tools:context="purplevomit.commit.ui.FeedActivity">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/feed"
@@ -21,7 +21,7 @@
         android:layout_height="match_parent"
         android:background="@color/colorPrimaryDark">
 
-        <purplevomit.commit.LoadingGrid
+        <purplevomit.commit.ui.LoadingGrid
             android:id="@android:id/empty"
             android:layout_width="150dp"
             android:layout_height="150dp"

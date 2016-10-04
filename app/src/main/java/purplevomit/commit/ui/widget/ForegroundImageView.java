@@ -1,4 +1,4 @@
-package purplevomit.commit;
+package purplevomit.commit.ui.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -7,8 +7,10 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ViewOutlineProvider;
 
+import purplevomit.commit.R;
+
 /**
- * Created by bhav on 9/24/16 for the CommitReader Project.
+ * Extension of ImageView to add foreground capabilities.
  */
 public class ForegroundImageView extends ComicImageView {
 

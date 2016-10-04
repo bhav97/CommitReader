@@ -1,4 +1,4 @@
-package purplevomit.commit;
+package purplevomit.commit.ui.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -1,4 +1,4 @@
-package purplevomit.commit;
+package purplevomit.commit.data.api;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
- * Created by bhav on 9/23/16 for the CommitReader Project.
+ * Interface to interact with api for retrofit. Hail retrofit. `\(-.-)/`
  */
 public interface IApp {
     String ENDPOINT = "https://cs-scraper.herokuapp.com/";

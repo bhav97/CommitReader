@@ -1,17 +1,18 @@
-package purplevomit.commit;
+package purplevomit.commit.data;
 
+import purplevomit.commit.data.api.IApp;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by bhav on 9/23/16 for the CommitReader Project.
+ * Base class for Loading data. Manages retrofit interface.
  */
-public abstract class LoaderBase<T, K> {
+abstract class LoaderBase<T, K> {
 
     private int loadingCount;
     private IApp dataInterface;
 
-    public LoaderBase() {
+    LoaderBase() {
         loadingCount = 0;
     }
 
@@ -51,7 +52,7 @@ public abstract class LoaderBase<T, K> {
                 .create(IApp.class);
     }
 
-    public IApp getDataInterface() {
+    IApp getDataInterface() {
         if(dataInterface ==null) createApi();
         return dataInterface;
     }

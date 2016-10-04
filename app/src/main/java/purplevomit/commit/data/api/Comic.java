@@ -1,24 +1,36 @@
-package purplevomit.commit;
+package purplevomit.commit.data.api;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by bhav on 9/23/16 for the CommitReader Project.
+ * Model for a Comic.
  */
 public class Comic implements Parcelable {
+
     public final static String INTENT_EXTRA = Comic.class.getSimpleName() + ".intent";
     public final static String BUNDLE_EXTRA = Comic.class.getSimpleName() + ".bundle";
-    public long id;
-    public long height;
-    public long width;
+    public static final Creator<Comic> CREATOR = new Creator<Comic>() {
+        @Override
+        public Comic createFromParcel(Parcel in) {
+            return new Comic(in);
+        }
+
+        @Override
+        public Comic[] newArray(int size) {
+            return new Comic[size];
+        }
+    };
     public final String thumbnail;
     public final String logo;
-    public String image;
     public final String url;
     public final String title;
     public final int page;
-    public boolean exposed = false;
+    public long id;
+    public long height;
+    public long width;
+    //    public boolean exposed = false;
+    public String image;
 
     public Comic(long id,
                  long height,
@@ -41,7 +53,7 @@ public class Comic implements Parcelable {
         this.page = page;
     }
 
-    protected Comic(Parcel in) {
+    private Comic(Parcel in) {
         id = in.readLong();
         height = in.readLong();
         width = in.readLong();
@@ -51,20 +63,8 @@ public class Comic implements Parcelable {
         url = in.readString();
         title = in.readString();
         page = in.readInt();
-        exposed = in.readByte() != 0x00;
+//        exposed = in.readByte() != 0x00;
     }
-
-    public static final Creator<Comic> CREATOR = new Creator<Comic>() {
-        @Override
-        public Comic createFromParcel(Parcel in) {
-            return new Comic(in);
-        }
-
-        @Override
-        public Comic[] newArray(int size) {
-            return new Comic[size];
-        }
-    };
 
     @Override
     public int describeContents() {
@@ -84,9 +84,12 @@ public class Comic implements Parcelable {
         parcel.writeInt(page);
     }
 
+    /**
+     * Model for a request to fetch Comic from the api.
+     */
     public static class ComicRequest {
 
-        public final String url;
+        final String url;
 
         public ComicRequest(String url) {
             this.url = url;

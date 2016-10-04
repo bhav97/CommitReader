@@ -1,4 +1,4 @@
-package purplevomit.commit;
+package purplevomit.commit.ui;
 
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
