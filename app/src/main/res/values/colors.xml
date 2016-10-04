@@ -3,7 +3,7 @@
     <color name="cs_black">#1F1F1F</color>
     <color name="cs_blue">#2B3F6B</color>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryDark">@color/cs_blue</color> <!-- #303F9F -->
     <color name="colorAccent">#FF4081</color>
     <color name="thumb_placeholder">#777777</color>
     <color name="comic_placeholder">#EDEDED</color>

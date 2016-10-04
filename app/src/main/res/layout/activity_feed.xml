@@ -19,9 +19,9 @@
         android:id="@+id/empty_bg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark">
+        android:background="@color/cs_blue">
 
-        <purplevomit.commit.ui.LoadingGrid
+        <purplevomit.commit.ui.widget.LoadingGrid
             android:id="@android:id/empty"
             android:layout_width="150dp"
             android:layout_height="150dp"

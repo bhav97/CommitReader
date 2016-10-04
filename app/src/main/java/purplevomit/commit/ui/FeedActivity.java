@@ -1,6 +1,7 @@
 package purplevomit.commit.ui;
 
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -14,7 +15,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -35,20 +35,24 @@ import butterknife.BindDimen;
 import butterknife.BindInt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import purplevomit.commit.data.api.Comic;
-import purplevomit.commit.data.Loader;
 import purplevomit.commit.R;
+import purplevomit.commit.data.Loader;
+import purplevomit.commit.data.api.Comic;
+import purplevomit.commit.ui.widget.LoadingGrid;
 import uk.co.senab.photoview.PhotoView;
 
 import static android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import static android.support.design.widget.BottomSheetBehavior.STATE_COLLAPSED;
+import static android.support.design.widget.BottomSheetBehavior.STATE_DRAGGING;
 import static android.support.design.widget.BottomSheetBehavior.STATE_EXPANDED;
 import static android.support.design.widget.BottomSheetBehavior.STATE_HIDDEN;
 import static android.support.design.widget.BottomSheetBehavior.from;
-import static android.view.View.*;
+import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
 
 public class FeedActivity extends AppCompatActivity {
-    private final static String TAG = FeedActivity.class.getSimpleName();
+//    private final static String TAG = FeedActivity.class.getSimpleName();
 
     @BindView(R.id.feed)
     RecyclerView feed;
@@ -83,7 +87,8 @@ public class FeedActivity extends AppCompatActivity {
 
     private boolean connected = true;
     private boolean networkMonitored = false;
-    private int previousSheetState = 9;
+    //    private int previousSheetState = 9;
+    private boolean userZoom = false;
 
     private BottomSheetCallback sheetCallback = new BottomSheetCallback() {
         @Override
@@ -91,7 +96,7 @@ public class FeedActivity extends AppCompatActivity {
             if (newState == STATE_COLLAPSED) {
                 changeRecyclerViewBottomPadding(sheetHeight);
                 if (gridLayoutManager.findLastVisibleItemPosition() == comics.size() - 1) {
-                    Log.d(TAG, "onStateChanged: ");
+//                    Log.d(TAG, "onStateChanged: ");
                     feed.smoothScrollBy(0, sheetHeight);
                     title.setCompoundDrawables(null, null, getDrawable(R.drawable.ic_keyboard_arrow_up_black_24dp), null);
                 }
@@ -100,8 +105,10 @@ public class FeedActivity extends AppCompatActivity {
                 changeRecyclerViewBottomPadding(feed.getPaddingTop());
             } else if (newState == STATE_EXPANDED) {
                 title.setCompoundDrawables(null, null, getDrawable(R.drawable.ic_keyboard_arrow_down_black_24dp), null);
+            } else if (userZoom && newState == STATE_DRAGGING) {
+                sheetBehavior.setState(STATE_EXPANDED);
             }
-            previousSheetState = newState;
+//            previousSheetState = newState;
         }
 
         @Override
@@ -152,6 +159,8 @@ public class FeedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feed);
         ButterKnife.bind(this);
 
+        setTaskDescription(new ActivityManager.TaskDescription("CommitStrip", null, ContextCompat.getColor(this, R.color.cs_blue)));
+
         sheetBehavior = from(bottomSheet);
         sheetBehavior.setHideable(true);
         sheetBehavior.setPeekHeight(sheetHeight);
@@ -175,7 +184,7 @@ public class FeedActivity extends AppCompatActivity {
         feed.setLayoutManager(gridLayoutManager);
 
         title.setOnClickListener(view -> {
-            if (comicLoaded) {
+            if (comicLoaded && sheetBehavior.getState() != STATE_COLLAPSED) {
                 sheetBehavior.setState(STATE_EXPANDED);
             } else {
                 sheetBehavior.setState(STATE_HIDDEN);
@@ -247,6 +256,8 @@ public class FeedActivity extends AppCompatActivity {
         } else {
             if (connected) loader.getComicList();
         }
+
+        comicHolder.setOnMatrixChangeListener(rect -> userZoom = comicHolder.getScale() > 1);
     }
 
     @Override

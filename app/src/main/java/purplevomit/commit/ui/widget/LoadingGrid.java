@@ -1,4 +1,4 @@
-package purplevomit.commit.ui;
+package purplevomit.commit.ui.widget;
 
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
@@ -381,7 +381,7 @@ public class LoadingGrid extends View {
         private ArrayList<ValueAnimator> onCreateAnimators() {
             ArrayList<ValueAnimator> animators = new ArrayList<>();
             int[] durations = {720, 1020, 1280, 1420, 1450, 1180, 870, 1450, 1060, 720, 1020, 1280, 1420, 1450, 1180, 870};
-            int[] delays = {-60, 250, -170, 480, 310, 30, 460, 780, 450, -170, 480, 310, 30, 460, 780, 450};
+            int[] delays = {60, 250, 0, 480, 310, 30, 460, 780, 450, 0, 480, 310, 30, 460, 780, 450};
 
             for (int i = 0; i < 16; i++) {
                 final int index = i;
