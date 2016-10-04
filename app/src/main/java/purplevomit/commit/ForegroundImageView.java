@@ -10,7 +10,7 @@ import android.view.ViewOutlineProvider;
 /**
  * Created by bhav on 9/24/16 for the CommitReader Project.
  */
-public class ForegroundImageView extends CRImageView {
+public class ForegroundImageView extends ComicImageView {
 
     private Drawable foreground;
 

@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -86,10 +87,16 @@ public class FeedActivity extends AppCompatActivity {
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if(newState == STATE_COLLAPSED) {
                 changeRecyclerViewBottomPadding(sheetHeight);
+                if(gridLayoutManager.findLastVisibleItemPosition() == comics.size()-1) {
+                    Log.d(TAG, "onStateChanged: ");
+                    feed.smoothScrollBy(0, sheetHeight);
+                    title.setCompoundDrawables(null, null, getDrawable(R.drawable.ic_keyboard_arrow_up_black_24dp), null);
+                }
             } else if (newState == STATE_HIDDEN) {
                 comicLoaded = false;
                 changeRecyclerViewBottomPadding(feed.getPaddingTop());
-//            } else if (newState == STATE_EXPANDED) {
+            } else if (newState == STATE_EXPANDED) {
+                title.setCompoundDrawables(null, null, getDrawable(R.drawable.ic_keyboard_arrow_down_black_24dp), null);
             }
             previousSheetState = newState;
         }
@@ -102,7 +109,9 @@ public class FeedActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(Comic.BUNDLE_EXTRA, comics);
+        if(!comics.isEmpty()) {
+            outState.putParcelableArrayList(Comic.BUNDLE_EXTRA, comics);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -124,10 +133,6 @@ public class FeedActivity extends AppCompatActivity {
             public void onSelect(Comic comic) {
                 title.setText(comic.title);
                 sheetBehavior.setState(STATE_COLLAPSED);
-                if(gridLayoutManager.findLastCompletelyVisibleItemPosition() == comics.size()-1) {
-                    //todo: recyclerview needs to be pushed up here
-                    feed.smoothScrollToPosition(comics.size()-1);
-                }
                 if(loadedComic != comic) {
                     loader.getComic(comic);
                 }
@@ -191,7 +196,7 @@ public class FeedActivity extends AppCompatActivity {
                                                            boolean isFromMemoryCache,
                                                            boolean isFirstResource) {
                                 dlprogress.setVisibility(INVISIBLE);
-                                if(!gridLayoutManager.isSmoothScrolling()) {
+                                if(sheetBehavior.getState() == STATE_COLLAPSED) {
                                     sheetBehavior.setState(STATE_EXPANDED);
                                 }
                                 return false;
@@ -204,7 +209,7 @@ public class FeedActivity extends AppCompatActivity {
 
         checkConnectivity();
         //note: vaadaa paav
-        if (savedInstanceState != null && savedInstanceState.containsKey(Comic.BUNDLE_EXTRA) && !comics.isEmpty()) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(Comic.BUNDLE_EXTRA)) {
             comics.addAll(savedInstanceState.getParcelableArrayList(Comic.BUNDLE_EXTRA));
             comicAdapter.notifyDataSetChanged();
             finishLoad();

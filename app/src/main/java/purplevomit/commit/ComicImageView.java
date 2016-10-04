@@ -7,9 +7,10 @@ import android.widget.ImageView;
 /**
  * ImageView with a custom preset aspect ratio.
  */
-public class CRImageView extends ImageView {
+//todo: make generic?
+public class ComicImageView extends ImageView {
 
-    public CRImageView(Context context, AttributeSet attrs) {
+    public ComicImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
