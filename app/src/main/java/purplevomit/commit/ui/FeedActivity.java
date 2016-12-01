@@ -52,7 +52,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 public class FeedActivity extends AppCompatActivity {
-//    private final static String TAG = FeedActivity.class.getSimpleName();
+    private final static String TAG = FeedActivity.class.getSimpleName();
 
     @BindView(R.id.feed)
     RecyclerView feed;
@@ -307,6 +307,7 @@ public class FeedActivity extends AppCompatActivity {
             noConnection.setVisibility(VISIBLE);
             getWindow().setStatusBarColor(ContextCompat.getColor(FeedActivity.this,
                     android.R.color.holo_red_light));
+
             connectivityManager.registerNetworkCallback(
                     new NetworkRequest.Builder()
                             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(),

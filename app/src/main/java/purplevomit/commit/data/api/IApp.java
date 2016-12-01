@@ -20,7 +20,7 @@ public interface IApp {
                                    @Path("page") int page);
 
     @POST("v1/comic/")
-    Call<Comic> getComic(@Body Comic.ComicRequest cr);
+    Call<Comic> getComic(@Body Comic.Request request);
 
     @GET("v1/search/{language}/{page}")
     Call<List<Comic>> search(@Path("language") String language,

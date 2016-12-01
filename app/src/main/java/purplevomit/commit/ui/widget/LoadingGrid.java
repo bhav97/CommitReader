@@ -28,7 +28,7 @@ public class LoadingGrid extends View {
     int mMaxWidth;
     int mMinHeight;
     int mMaxHeight;
-    private BAAAALLS baaaalls;
+    private Grid balls;
     private int mIndicatorColor;
     private boolean mShouldStartAnimationDrawable;
 
@@ -59,18 +59,18 @@ public class LoadingGrid extends View {
         mMaxHeight = 48;
 
         mIndicatorColor = Color.WHITE;
-        setIndicator(new BAAAALLS());
+        setIndicator(new Grid());
 
     }
 
-    public void setIndicator(BAAAALLS d) {
-        if (baaaalls != d) {
-            if (baaaalls != null) {
-                baaaalls.setCallback(null);
-                unscheduleDrawable(baaaalls);
+    public void setIndicator(Grid d) {
+        if (balls != d) {
+            if (balls != null) {
+                balls.setCallback(null);
+                unscheduleDrawable(balls);
             }
 
-            baaaalls = d;
+            balls = d;
             //need to set indicator color again if you didn't specified when you update the indicator .
             setIndicatorColor(mIndicatorColor);
             if (d != null) {
@@ -82,12 +82,12 @@ public class LoadingGrid extends View {
 
     public void setIndicatorColor(int color) {
         this.mIndicatorColor = color;
-        baaaalls.setColor(color);
+        balls.setColor(color);
     }
 
     @Override
     protected boolean verifyDrawable(@NonNull Drawable who) {
-        return who == baaaalls
+        return who == balls
                 || super.verifyDrawable(who);
     }
 
@@ -96,15 +96,15 @@ public class LoadingGrid extends View {
             return;
         }
 
-        if (baaaalls != null) {
+        if (balls != null) {
             mShouldStartAnimationDrawable = true;
         }
         postInvalidate();
     }
 
     void stopAnimation() {
-        if (baaaalls != null) {
-            baaaalls.stop();
+        if (balls != null) {
+            balls.stop();
             mShouldStartAnimationDrawable = false;
         }
         postInvalidate();
@@ -162,11 +162,11 @@ public class LoadingGrid extends View {
         int top = 0;
         int left = 0;
 
-        if (baaaalls != null) {
+        if (balls != null) {
             // Maintain aspect ratio. Certain kinds of animated drawables
             // get very confused otherwise.
-            final int intrinsicWidth = baaaalls.getIntrinsicWidth();
-            final int intrinsicHeight = baaaalls.getIntrinsicHeight();
+            final int intrinsicWidth = balls.getIntrinsicWidth();
+            final int intrinsicHeight = balls.getIntrinsicHeight();
             final float intrinsicAspect = (float) intrinsicWidth / intrinsicHeight;
             final float boundAspect = (float) w / h;
             if (intrinsicAspect != boundAspect) {
@@ -182,7 +182,7 @@ public class LoadingGrid extends View {
                     bottom = top + height;
                 }
             }
-            baaaalls.setBounds(left, top, right, bottom);
+            balls.setBounds(left, top, right, bottom);
         }
     }
 
@@ -193,7 +193,7 @@ public class LoadingGrid extends View {
     }
 
     void drawTrack(Canvas canvas) {
-        final Drawable d = baaaalls;
+        final Drawable d = balls;
         if (d != null) {
             // Translate canvas so a indeterminate circular progress bar with padding
             // rotates properly in its animation
@@ -216,7 +216,7 @@ public class LoadingGrid extends View {
         int dw = 0;
         int dh = 0;
 
-        final Drawable d = baaaalls;
+        final Drawable d = balls;
         if (d != null) {
             dw = Math.max(mMinWidth, Math.min(mMaxWidth, d.getIntrinsicWidth()));
             dh = Math.max(mMinHeight, Math.min(mMaxHeight, d.getIntrinsicHeight()));
@@ -240,8 +240,8 @@ public class LoadingGrid extends View {
 
     private void updateDrawableState() {
         final int[] state = getDrawableState();
-        if (baaaalls != null && baaaalls.isStateful()) {
-            baaaalls.setState(state);
+        if (balls != null && balls.isStateful()) {
+            balls.setState(state);
         }
     }
 
@@ -250,8 +250,8 @@ public class LoadingGrid extends View {
     public void drawableHotspotChanged(float x, float y) {
         super.drawableHotspotChanged(x, y);
 
-        if (baaaalls != null) {
-            baaaalls.setHotspot(x, y);
+        if (balls != null) {
+            balls.setHotspot(x, y);
         }
     }
 
@@ -269,7 +269,7 @@ public class LoadingGrid extends View {
         super.onDetachedFromWindow();
     }
 
-    class BAAAALLS extends Drawable implements Animatable {
+    class Grid extends Drawable implements Animatable {
 
         private static final int ALPHA = 255;
         private static final float SCALE = 1.0f;
@@ -319,7 +319,7 @@ public class LoadingGrid extends View {
         private Paint mPaint = new Paint();
         private long pauseTime;
 
-        BAAAALLS() {
+        Grid() {
             mPaint.setColor(Color.WHITE);
             mPaint.setStyle(Paint.Style.FILL);
             mPaint.setAntiAlias(true);

@@ -2,13 +2,12 @@ package purplevomit.commit.ui.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ImageView;
+import android.view.View;
 
 /**
- * ImageView with a custom preset aspect ratio.
+ * ImageView with a custom preset aspect ratio (16:9).
  */
-//todo: make generic?
-public class ComicImageView extends ImageView {
+public class ComicImageView extends ForegroundImageView {
 
     public ComicImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -16,8 +15,8 @@ public class ComicImageView extends ImageView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int fourThreeHeight = MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec) * 9 / 16,
-                MeasureSpec.EXACTLY);
+        int fourThreeHeight = View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec) * 9 / 16,
+                View.MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, fourThreeHeight);
     }
 }

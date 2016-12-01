@@ -6,13 +6,14 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ViewOutlineProvider;
+import android.widget.ImageView;
 
 import purplevomit.commit.R;
 
 /**
  * Extension of ImageView to add foreground capabilities.
  */
-public class ForegroundImageView extends ComicImageView {
+public class ForegroundImageView extends ImageView {
 
     private Drawable foreground;
 

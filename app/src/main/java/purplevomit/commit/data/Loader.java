@@ -58,7 +58,7 @@ public abstract class Loader extends LoaderBase<List<Comic>, Comic> {
 
     public void getComic(Comic comic) {
         loadStarted(CALL_TYPE_COMIC);
-        Call<Comic> comicCall = getDataInterface().getComic(new Comic.ComicRequest(comic.url));
+        Call<Comic> comicCall = getDataInterface().getComic(new Comic.Request(comic.url));
         comicCall.enqueue(new Callback<Comic>() {
             @Override
             public void onResponse(Call<Comic> call, Response<Comic> response) {

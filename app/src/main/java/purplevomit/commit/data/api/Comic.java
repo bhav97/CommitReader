@@ -29,7 +29,6 @@ public class Comic implements Parcelable {
     public long id;
     public long height;
     public long width;
-    //    public boolean exposed = false;
     public String image;
 
     public Comic(long id,
@@ -63,7 +62,6 @@ public class Comic implements Parcelable {
         url = in.readString();
         title = in.readString();
         page = in.readInt();
-//        exposed = in.readByte() != 0x00;
     }
 
     @Override
@@ -87,11 +85,11 @@ public class Comic implements Parcelable {
     /**
      * Model for a request to fetch Comic from the api.
      */
-    public static class ComicRequest {
+    public static class Request {
 
         final String url;
 
-        public ComicRequest(String url) {
+        public Request(String url) {
             this.url = url;
         }
     }
