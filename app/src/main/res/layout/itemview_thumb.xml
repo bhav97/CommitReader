@@ -4,9 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
+    android:elevation="4dp"
     android:padding="2dp">
 
-    <purplevomit.commit.ui.widget.ForegroundImageView
+    <bhav.commit.ui.widget.ComicImageView
         android:id="@+id/thumb"
         android:layout_width="match_parent"
         android:layout_height="0dp"

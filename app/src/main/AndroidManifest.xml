@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="purplevomit.commit">
+    package="bhav.commit">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.FeedActivity"
+            android:name="bhav.commit.ui.FeedActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,7 +23,7 @@
         </activity>
 
         <meta-data
-            android:name="purplevomit.commit.util.GlideConfiguration"
+            android:name="bhav.commit.util.GlideConfiguration"
             android:value="GlideModule" />
         <meta-data
             android:name="com.bumptech.glide.integration.okhttp3.OkHttpGlideModule"

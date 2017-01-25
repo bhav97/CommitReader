@@ -1,4 +1,4 @@
-package purplevomit.commit.ui.widget;
+package bhav.commit.ui.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -8,7 +8,7 @@ import android.util.AttributeSet;
 import android.view.ViewOutlineProvider;
 import android.widget.ImageView;
 
-import purplevomit.commit.R;
+import bhav.commit.R;
 
 /**
  * Extension of ImageView to add foreground capabilities.

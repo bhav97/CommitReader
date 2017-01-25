@@ -1,6 +1,6 @@
-package purplevomit.commit.data;
+package bhav.commit.data;
 
-import purplevomit.commit.data.api.IApp;
+import bhav.commit.data.api.IApp;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 

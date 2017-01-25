@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package purplevomit.commit.util;
+package bhav.commit.util;
 
 import android.app.ActivityManager;
 import android.content.Context;

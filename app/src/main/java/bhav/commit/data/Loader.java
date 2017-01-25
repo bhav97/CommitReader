@@ -1,4 +1,4 @@
-package purplevomit.commit.data;
+package bhav.commit.data;
 
 import android.os.Build;
 import android.util.Log;
@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import purplevomit.commit.data.api.Comic;
+import bhav.commit.data.api.Comic;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

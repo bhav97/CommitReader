@@ -1,4 +1,4 @@
-package purplevomit.commit.ui;
+package bhav.commit.ui;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -19,15 +19,15 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.List;
 
+import bhav.commit.R;
+import bhav.commit.data.api.Comic;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import purplevomit.commit.data.api.Comic;
-import purplevomit.commit.R;
 
 /**
  * Adapter class for managing recyclerViews.
  */
-public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder> {
+public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder>{
 
     private final static String TAG = ComicAdapter.class.getSimpleName();
 

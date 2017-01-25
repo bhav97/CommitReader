@@ -1,20 +1,27 @@
-package purplevomit.commit.ui;
+package bhav.commit.ui;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -31,14 +38,17 @@ import com.bumptech.glide.request.target.Target;
 import java.util.ArrayList;
 import java.util.List;
 
+import bhav.commit.R;
+import bhav.commit.data.Loader;
+import bhav.commit.data.api.Comic;
+import bhav.commit.ui.recyclerview.SwipeCallback;
+import bhav.commit.ui.recyclerview.SwipeableRecyclerViewTouchListener;
+import bhav.commit.ui.widget.LoadingGrid;
+import bhav.commit.util.EndListener;
 import butterknife.BindDimen;
 import butterknife.BindInt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import purplevomit.commit.R;
-import purplevomit.commit.data.Loader;
-import purplevomit.commit.data.api.Comic;
-import purplevomit.commit.ui.widget.LoadingGrid;
 import uk.co.senab.photoview.PhotoView;
 
 import static android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
@@ -66,10 +76,14 @@ public class FeedActivity extends AppCompatActivity {
     PhotoView comicHolder;
     @BindView(R.id.dlprogress)
     ProgressBar dlprogress;
+    @BindView(R.id.base)
+    CoordinatorLayout base;
     @BindView(R.id.no_connection)
     FrameLayout noConnection;
     @BindView(R.id.empty_bg)
     FrameLayout emptyBg;
+    @BindView(R.id.sad)
+    TextView sad;
     @BindInt(R.integer.columns)
     int columns;
     @BindDimen(R.dimen.bottom_sheet_height)
@@ -82,7 +96,6 @@ public class FeedActivity extends AppCompatActivity {
     private ArrayList<Comic> comics;
     private Loader loader;
 
-    private boolean comicLoaded = false;
     private Comic loadedComic;
 
     private boolean connected = true;
@@ -90,32 +103,53 @@ public class FeedActivity extends AppCompatActivity {
     //    private int previousSheetState = 9;
     private boolean userZoom = false;
 
+    private SwipeableRecyclerViewTouchListener swipeTouchListener;
+
+    private ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(0,
+            ItemTouchHelper.RIGHT) {
+        @Override
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+            Snackbar.make(base, "Swipe " + String.valueOf(direction), Snackbar.LENGTH_SHORT).show();
+        }
+    });
+
     private BottomSheetCallback sheetCallback = new BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if (newState == STATE_COLLAPSED) {
                 changeRecyclerViewBottomPadding(sheetHeight);
-                if (gridLayoutManager.findLastVisibleItemPosition() == comics.size() - 1) {
-//                    Log.d(TAG, "onStateChanged: ");
-                    feed.smoothScrollBy(0, sheetHeight);
-                    title.setCompoundDrawables(null, null, getDrawable(R.drawable.ic_keyboard_arrow_up_black_24dp), null);
-                }
             } else if (newState == STATE_HIDDEN) {
-                comicLoaded = false;
                 changeRecyclerViewBottomPadding(feed.getPaddingTop());
-            } else if (newState == STATE_EXPANDED) {
-                title.setCompoundDrawables(null, null, getDrawable(R.drawable.ic_keyboard_arrow_down_black_24dp), null);
-            } else if (userZoom && newState == STATE_DRAGGING) {
-                sheetBehavior.setState(STATE_EXPANDED);
+            }else if (userZoom && newState == STATE_DRAGGING) {
+                comicHolder.setScale(1, true);
             }
-//            previousSheetState = newState;
         }
 
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            //animate something
+//            Drawable d = GraphicUtils.rotate(
+//                    (int) slideOffset* 180,
+//                    title.getCompoundDrawables()[2],
+//                    FeedActivity.this
+//            );
+//            title.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
         }
     };
+
+    @Override
+    public void onBackPressed() {
+        if(sheetBehavior.getState() != STATE_EXPANDED) {
+            super.onBackPressed();
+        } else {
+            sheetBehavior.setState(STATE_COLLAPSED);
+        }
+    }
+
     private ConnectivityManager.NetworkCallback connectivityCallback = new ConnectivityManager.NetworkCallback() {
         @Override
         public void onAvailable(Network network) {
@@ -126,20 +160,17 @@ public class FeedActivity extends AppCompatActivity {
 //                fadeOut(noConnection);
                 progress.setVisibility(VISIBLE);
                 loader.getComicList();
-                getWindow().setStatusBarColor(ContextCompat.getColor(FeedActivity.this,
-                        R.color.colorPrimaryDark));
+                setUiColor(R.color.colorPrimaryDark);
             });
         }
 
         @Override
         public void onLost(Network network) {
             if (comicAdapter.getDataItemCount() == 0) {
-                runOnUiThread(() -> {
-                    checkConnectivity();
-                });
+                runOnUiThread(() -> checkConnectivity());
             } else {
-                getWindow().setStatusBarColor(ContextCompat.getColor(FeedActivity.this,
-                        android.R.color.holo_red_light));
+                runOnUiThread(() -> setUiColor(android.R.color.holo_red_light));
+//               setUiColor(android.R.color.holo_red_light);
             }
             connected = false;
         }
@@ -153,19 +184,17 @@ public class FeedActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
         ButterKnife.bind(this);
 
-        setTaskDescription(new ActivityManager.TaskDescription("CommitStrip", null, ContextCompat.getColor(this, R.color.cs_blue)));
+        setUiColor(R.color.colorPrimaryDark);
 
-        sheetBehavior = from(bottomSheet);
-        sheetBehavior.setHideable(true);
-        sheetBehavior.setPeekHeight(sheetHeight);
-        sheetBehavior.setBottomSheetCallback(sheetCallback);
-        sheetBehavior.setState(STATE_HIDDEN);
+        setupBottomSheet();
 
         comics = new ArrayList<>();
         comicAdapter = new ComicAdapter(this, comics) {
@@ -182,20 +211,14 @@ public class FeedActivity extends AppCompatActivity {
         gridLayoutManager = new GridLayoutManager(this, columns);
         feed.setAdapter(comicAdapter);
         feed.setLayoutManager(gridLayoutManager);
-
-        title.setOnClickListener(view -> {
-            if (comicLoaded && sheetBehavior.getState() != STATE_COLLAPSED) {
-                sheetBehavior.setState(STATE_EXPANDED);
-            } else {
-                sheetBehavior.setState(STATE_HIDDEN);
-            }
-        });
+        itemTouchHelper.attachToRecyclerView(feed);
 
         loader = new Loader(getSharedPreferences("prefs", Context.MODE_PRIVATE)
                 .getString("language", "en")) {
             @Override
             protected void loadStarted(String s) {
                 dlprogress.setVisibility(VISIBLE);
+
             }
 
             @Override
@@ -248,7 +271,7 @@ public class FeedActivity extends AppCompatActivity {
         };
 
         checkConnectivity();
-        //note: vaadaa paav
+
         if (savedInstanceState != null && savedInstanceState.containsKey(Comic.BUNDLE_EXTRA)) {
             comics.addAll(savedInstanceState.getParcelableArrayList(Comic.BUNDLE_EXTRA));
             comicAdapter.notifyDataSetChanged();
@@ -260,6 +283,14 @@ public class FeedActivity extends AppCompatActivity {
         comicHolder.setOnMatrixChangeListener(rect -> userZoom = comicHolder.getScale() > 1);
     }
 
+    private void setupBottomSheet() {
+        sheetBehavior = from(bottomSheet);
+        sheetBehavior.setHideable(true);
+        sheetBehavior.setPeekHeight(sheetHeight);
+        sheetBehavior.setBottomSheetCallback(sheetCallback);
+        sheetBehavior.setState(STATE_HIDDEN);
+    }
+
     @Override
     protected void onDestroy() {
         loader.cancelLoading();
@@ -268,6 +299,7 @@ public class FeedActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        //restore bundle
         checkConnectivity();
         super.onResume();
     }
@@ -292,6 +324,16 @@ public class FeedActivity extends AppCompatActivity {
                         feed.getPaddingRight(),
                         (Integer) valueAnimator.getAnimatedValue())
         );
+        animator.addListener(new EndListener.AnimatorEndListener() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (gridLayoutManager.findLastCompletelyVisibleItemPosition() != comics.size() - 1
+                        &&
+                        gridLayoutManager.findLastVisibleItemPosition() == comics.size() -1) {
+                    feed.smoothScrollBy(0, sheetHeight);
+                }
+            }
+        });
         animator.setDuration(200);
         animator.start();
     }
@@ -301,13 +343,10 @@ public class FeedActivity extends AppCompatActivity {
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         connected = activeNetworkInfo != null && activeNetworkInfo.isConnected();
-        //todo: more connectivity checks
         if (!connected) {
             sheetBehavior.setState(STATE_HIDDEN);
             noConnection.setVisibility(VISIBLE);
-            getWindow().setStatusBarColor(ContextCompat.getColor(FeedActivity.this,
-                    android.R.color.holo_red_light));
-
+            setUiColor(android.R.color.holo_red_light);
             connectivityManager.registerNetworkCallback(
                     new NetworkRequest.Builder()
                             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(),
@@ -321,20 +360,32 @@ public class FeedActivity extends AppCompatActivity {
         progress.setAnimation(fadeOut);
         emptyBg.setAnimation(fadeOut);
         fadeOut.start();
-        fadeOut.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-            } //no-op
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            } //no-op
-
+        fadeOut.setAnimationListener(new EndListener.AnimationEndListener() {
             @Override
             public void onAnimationEnd(Animation animation) {
                 emptyBg.setVisibility(GONE);
                 progress.setVisibility(GONE);
             }
         });
+    }
+
+    private void setUiColor(@ColorRes int ColorRes) {
+        getWindow().setStatusBarColor(ContextCompat.getColor(this,
+                ColorRes));
+        getWindow().setNavigationBarColor(ContextCompat.getColor(this,
+                ColorRes));
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inMutable = true;
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, options);
+        Bitmap iconerr = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_err);
+        boolean isOriginal = ColorRes == R.color.colorPrimaryDark;
+        setTaskDescription(
+                new ActivityManager.TaskDescription(
+                        getString(R.string.app_name),
+                        isOriginal ? icon : iconerr,
+//                        GraphicUtils.ChangeIconColor(icon, this),
+                        ContextCompat.getColor(this, ColorRes)
+                )
+        );
     }
 }

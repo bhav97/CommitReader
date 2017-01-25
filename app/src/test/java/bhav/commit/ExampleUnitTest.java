@@ -1,4 +1,4 @@
-package purplevomit.commit;
+package bhav.commit;
 
 import org.junit.Test;
 

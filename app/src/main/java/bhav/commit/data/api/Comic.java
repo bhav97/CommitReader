@@ -1,4 +1,4 @@
-package purplevomit.commit.data.api;
+package bhav.commit.data.api;
 
 import android.os.Parcel;
 import android.os.Parcelable;
