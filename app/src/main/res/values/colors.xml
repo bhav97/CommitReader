@@ -9,4 +9,5 @@
     <color name="comic_placeholder">#c6c6c6</color>
     <color name="background_dark">#323232</color>
     <color name="transparent">#00000000</color>
+    <color name="mid_black">#40000000</color>
 </resources>

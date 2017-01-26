@@ -79,6 +79,35 @@ public abstract class Loader extends LoaderBase<List<Comic>, Comic> {
         callMap.put(CALL_TYPE_COMIC, comicCall);
     }
 
+    public void downloadComic(Comic comic, int retryCount) {
+        if(retryCount == 0) {
+            onComicDownloaded(null);
+            return;
+        }
+        Call<Comic> comicCall = getDataInterface().getComic(new Comic.Request(comic.url));
+        comicCall.enqueue(new Callback<Comic>() {
+            @Override
+            public void onResponse(Call<Comic> call, Response<Comic> response) {
+                if (response.isSuccessful()) {
+                    comic.height = response.body().height;
+                    comic.image = response.body().image;
+                    comic.width = response.body().width;
+                    comic.id = response.body().id;
+                    onComicDownloaded(comic);
+                } else {
+                    Log.e(TAG, "Response Error: " + String.valueOf(response.code()));
+                    downloadComic(comic, retryCount-1);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Comic> call, Throwable t) {
+                Log.e(TAG, "Download Failed: ", t);
+            }
+        });
+        callMap.put(CALL_TYPE_COMIC, comicCall);
+    }
+
     private void loadFailed(Call call, String type) {
         loadFailed(type);
         if (callMap.containsValue(call)) {

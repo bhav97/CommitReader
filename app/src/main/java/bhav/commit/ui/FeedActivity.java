@@ -4,8 +4,10 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -42,9 +44,9 @@ import bhav.commit.R;
 import bhav.commit.data.Loader;
 import bhav.commit.data.api.Comic;
 import bhav.commit.ui.recyclerview.SwipeCallback;
-import bhav.commit.ui.recyclerview.SwipeableRecyclerViewTouchListener;
 import bhav.commit.ui.widget.LoadingGrid;
 import bhav.commit.util.EndListener;
+import bhav.commit.util.ImageDownloader;
 import butterknife.BindDimen;
 import butterknife.BindInt;
 import butterknife.BindView;
@@ -77,7 +79,7 @@ public class FeedActivity extends AppCompatActivity {
     @BindView(R.id.dlprogress)
     ProgressBar dlprogress;
     @BindView(R.id.base)
-    CoordinatorLayout base;
+    public CoordinatorLayout base;
     @BindView(R.id.no_connection)
     FrameLayout noConnection;
     @BindView(R.id.empty_bg)
@@ -97,26 +99,11 @@ public class FeedActivity extends AppCompatActivity {
     private Loader loader;
 
     private Comic loadedComic;
-
+    private ItemTouchHelper itemTouchHelper;
     private boolean connected = true;
     private boolean networkMonitored = false;
     //    private int previousSheetState = 9;
     private boolean userZoom = false;
-
-    private SwipeableRecyclerViewTouchListener swipeTouchListener;
-
-    private ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(0,
-            ItemTouchHelper.RIGHT) {
-        @Override
-        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-            return false;
-        }
-
-        @Override
-        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-            Snackbar.make(base, "Swipe " + String.valueOf(direction), Snackbar.LENGTH_SHORT).show();
-        }
-    });
 
     private BottomSheetCallback sheetCallback = new BottomSheetCallback() {
         @Override
@@ -125,7 +112,7 @@ public class FeedActivity extends AppCompatActivity {
                 changeRecyclerViewBottomPadding(sheetHeight);
             } else if (newState == STATE_HIDDEN) {
                 changeRecyclerViewBottomPadding(feed.getPaddingTop());
-            }else if (userZoom && newState == STATE_DRAGGING) {
+            } else if (userZoom && newState == STATE_DRAGGING) {
                 comicHolder.setScale(1, true);
             }
         }
@@ -142,11 +129,31 @@ public class FeedActivity extends AppCompatActivity {
     };
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case ImageDownloader.REQUEST_WRITE_EXT_CODE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Snackbar.make(base, "Permission Granted: Downloading available",
+                            Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Snackbar.make(base, "Permission Denied: Downloading unavailable",
+                            Snackbar.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
     public void onBackPressed() {
-        if(sheetBehavior.getState() != STATE_EXPANDED) {
-            super.onBackPressed();
-        } else {
+        if (sheetBehavior.getState() == STATE_EXPANDED) {
             sheetBehavior.setState(STATE_COLLAPSED);
+        } else if (sheetBehavior.getState() != STATE_HIDDEN) {
+            sheetBehavior.setState(STATE_HIDDEN);
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -185,7 +192,6 @@ public class FeedActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -193,7 +199,7 @@ public class FeedActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         setUiColor(R.color.colorPrimaryDark);
-
+        if(columns == 1) setUpSwipeCallback();
         setupBottomSheet();
 
         comics = new ArrayList<>();
@@ -211,7 +217,8 @@ public class FeedActivity extends AppCompatActivity {
         gridLayoutManager = new GridLayoutManager(this, columns);
         feed.setAdapter(comicAdapter);
         feed.setLayoutManager(gridLayoutManager);
-        itemTouchHelper.attachToRecyclerView(feed);
+        //not initialised on landscape and large devices
+        if (itemTouchHelper!= null) itemTouchHelper.attachToRecyclerView(feed);
 
         loader = new Loader(getSharedPreferences("prefs", Context.MODE_PRIVATE)
                 .getString("language", "en")) {
@@ -268,6 +275,15 @@ public class FeedActivity extends AppCompatActivity {
                         .into(comicHolder);
                 loadedComic = data;
             }
+
+            @Override
+            public void onComicDownloaded(Comic data) {
+                if(data == null) {
+                    Snackbar.make(base, "Network Error :(", Snackbar.LENGTH_SHORT).show();
+                } else {
+                    ImageDownloader.getImage(data, FeedActivity.this, 3);
+                }
+            }
         };
 
         checkConnectivity();
@@ -281,6 +297,29 @@ public class FeedActivity extends AppCompatActivity {
         }
 
         comicHolder.setOnMatrixChangeListener(rect -> userZoom = comicHolder.getScale() > 1);
+    }
+
+    private void setUpSwipeCallback() {
+        Typeface axure = Typeface.createFromAsset(getAssets(), "fonts/axure.ttf");
+        itemTouchHelper = new ItemTouchHelper(new SwipeCallback(0,
+                ItemTouchHelper.RIGHT, axure) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                comicAdapter.notifyItemChanged(viewHolder.getAdapterPosition());
+                Snackbar.make(base, "Starting Download", Snackbar.LENGTH_LONG).show();
+                Comic dlComic = comicAdapter.comicList.get(viewHolder.getAdapterPosition());
+                if(dlComic.image == null) {
+                    loader.downloadComic(dlComic, 3);
+                } else {
+                    ImageDownloader.getImage(dlComic, FeedActivity.this, 3);
+                }
+            }
+        });
     }
 
     private void setupBottomSheet() {
@@ -329,7 +368,7 @@ public class FeedActivity extends AppCompatActivity {
             public void onAnimationEnd(Animator animation) {
                 if (gridLayoutManager.findLastCompletelyVisibleItemPosition() != comics.size() - 1
                         &&
-                        gridLayoutManager.findLastVisibleItemPosition() == comics.size() -1) {
+                        gridLayoutManager.findLastVisibleItemPosition() == comics.size() - 1) {
                     feed.smoothScrollBy(0, sheetHeight);
                 }
             }

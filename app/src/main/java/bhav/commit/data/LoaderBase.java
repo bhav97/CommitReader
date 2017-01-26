@@ -20,6 +20,8 @@ abstract class LoaderBase<T, K> {
 
     public abstract void onComicLoaded(K data);
 
+    public abstract void onComicDownloaded(K data);
+
     public abstract void cancelLoading();
 
 

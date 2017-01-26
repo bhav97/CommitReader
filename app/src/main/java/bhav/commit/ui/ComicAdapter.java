@@ -1,5 +1,7 @@
 package bhav.commit.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Handler;
@@ -8,6 +10,7 @@ import android.support.v7.widget.RecyclerView.Adapter;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.webkit.URLUtil;
 import android.widget.FrameLayout;
@@ -36,12 +39,13 @@ public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder>{
 
     private final static long HOLD_MIN_DURATION = 200;
 
-    private List<Comic> comicList;
+    public List<Comic> comicList;
     private Activity host;
 
+
+    //dirty globals for fancy fx
     private boolean holding = false;
     private ComicThumbHolder Gli_holder;
-
     private Handler longTouchHandler = new Handler();
     private Runnable longTouchRunner = () -> {
         if (holding) {
@@ -67,21 +71,21 @@ public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder>{
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case VIEW_TYPE_COLOR:
-                return getNewColorHolder(parent);
+                return getColorHolder(parent);
             case VIEW_TYPE_IMAGE:
-                return getNewThumbHolder(parent);
+                return getThumbHolder(parent);
         }
         return null;
     }
 
-    private ComicColorHolder getNewColorHolder(ViewGroup parent) {
+    private ComicColorHolder getColorHolder(ViewGroup parent) {
         final ComicColorHolder holder = new ComicColorHolder(LayoutInflater.from(host)
                 .inflate(R.layout.itemview_color, parent, false));
         holder.bg.setOnClickListener((view) -> onSelect(comicList.get(holder.getAdapterPosition())));
         return holder;
     }
 
-    private ComicThumbHolder getNewThumbHolder(ViewGroup parent) {
+    private ComicThumbHolder getThumbHolder(ViewGroup parent) {
         final ComicThumbHolder holder = new ComicThumbHolder(LayoutInflater.from(host)
                 .inflate(R.layout.itemview_thumb, parent, false));
         holder.base.setOnClickListener((view) -> onSelect(comicList.get(holder.getAdapterPosition())));
@@ -96,12 +100,27 @@ public abstract class ComicAdapter extends Adapter<RecyclerView.ViewHolder>{
                 holding = false;
                 if (holder.data.getVisibility() == View.VISIBLE) {
                     holder.data.setVisibility(View.GONE);
+                    exitReveal(event.getX(), event.getY(), holder.data);
                     return true;
                 }
             }
             return false;
         });
         return holder;
+    }
+
+    private void exitReveal(float x, float y, View view) {
+        int initialRadius = view.getWidth() / 2;
+        Animator anim =
+                ViewAnimationUtils.createCircularReveal(view, (int) x, (int) y, initialRadius, 0);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                view.setVisibility(View.GONE);
+            }
+        });
+        anim.start();
     }
 
     @Override
